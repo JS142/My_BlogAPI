@@ -1,0 +1,204 @@
+﻿@page
+@model My_Blog_API.Pages.IndexModel
+@{
+}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Blog</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    
+        <!-- Navigation bar with Insert details button-->
+      
+         
+               <br />
+    <br>
+
+                    
+                
+           
+        
+        <br />
+        <!-- Main Area where data will display-->
+        <div class="container">
+            <div class="row" id="BlogDetailSection"></div>
+
+        </div>
+   
+    <!-- web form to insert the data-->
+    <div class="modal" tabindex="-1" role="dialog" id="addDetails">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Record</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="title"> Blog Title</label>
+                            <input type="text" class="form-control" id="title" aria-describedby="titleHelp">
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Blog Content</label>
+                            <input type="text" class="form-control" id="content" aria-describedby="contentHelp">
+                        </div>
+                       
+                        <div class="form-group" id="result">
+                        </div>
+                        <button type="button" onclick="insert()" class="btn btn-danger">Insert</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- web form to update the data-->
+    <div class="modal" tabindex="-1" role="dialog" id="UpdateDetails">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Record</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" id="Edit_id" aria-describedby="Id_Help">
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Blog Title</label>
+                            <input type="text" class="form-control" id="Edit_title" aria-describedby="titleHelp">
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Blog Content</label>
+                            <input type="text" class="form-control" id="Edit_content" aria-describedby="contentHelp">
+                        </div>
+                        
+                        <div class="form-group" id="resultUpdate">
+                        </div>
+                        <button type="button" onclick="Update()" class="btn btn-danger">Upgrade</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-dismiss="modal">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JavaScript Files-->
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script>
+        var uri = 'api/Blogs';
+        $(document).ready(function () {
+            // Gets all data
+            $.getJSON(uri).done(function (data) {
+                $("#Main_temp").tmpl(data).appendTo("#BlogDetailSection");
+            });
+        });
+        function BlogData() {
+            $.getJSON(uri).done(function (data) {
+                $("#BlogDetailSection").text("");
+                $("#Main_temp").tmpl(data).appendTo("#BlogDetailSection");
+            });
+        }
+        //function to Insert Data
+        function insert() {
+            var _title = $('#title').val();
+            var _content = $('#content').val();
+          
+            var BlogData_Obj = {
+                title: _title,
+                content: _content
+               
+            };
+            $.ajax({
+                type: "POST",
+                url: uri,
+                data: JSON.stringify(BlogData_Obj),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#result").html("Record Added successfully");
+                BlogData();
+            }).fail(function (jqXHR, textStatus) {
+                $("#result").html("Record is not Added. There is an error");
+            });
+        }
+        //function to Update Data
+        function Update() {
+            var _title = $('#Edit_title').val();
+            var _content = $('#Edit_content').val();
+           
+            var BlogUpdateData_Obj = {
+                blog_ID: parseInt($('#Edit_id').val()),
+                title: _title,
+                content: _content
+              
+            };
+            $.ajax({
+                type: "PUT",
+                url: uri + "/" + $('#Edit_id').val(),
+                data: JSON.stringify(BlogUpdateData_Obj),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#resultUpdate").html("Record updated ");
+                BlogData();
+            }).fail(function (jqXHR, textStatus) {
+                $("#resultUpdate").html("Record is not inserted. There is an error");
+            });
+        }
+        // function to remove record
+        function remove(id) {
+            var yes = confirm("Do you really want to delete this blog");
+            if (yes) {
+                $.ajax({
+                    type: "DELETE",
+                    url: uri + "/" + id,
+                }).done(function (response) {
+                    BlogData();
+                });
+            }
+        }
+        //function to display data in update form
+        function UpdateRecord(id) {
+            $.ajax({
+                type: "GET",
+                url: uri + "/" + id,
+                contentType: "application/json"
+            }).done(function (response) {
+                $('#Edit_id').val(response.blog_ID);
+                $('#Edit_title').val(response.title);
+                $('#Edit_content').val(response.content);
+            
+            });
+        }
+    </script>
+    <!--Template to display data-->
+    <script id="Main_temp" type="text/x-jquery-tmpl">
+    
+
+            <div class="list-group " style="width:100%;">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 style="width:20%">${title}   </h5>
+                   
+                    <p style="width:60%">${content}</p>
+                    <button style="height:40%;"class="btn btn-dark" onclick="UpdateRecord('${blog_ID}')" data-toggle="modal" data-target="#UpdateDetails">Update</button>
+                    <a style="height:40%;" href="#" class="btn btn-dark" onclick="remove('${blog_ID}')"> Delete</a>
+                </div>
+            </div>
+        
+    </script>
+</body>
+</html>
